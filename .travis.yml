@@ -7,8 +7,7 @@ go:
 
 install:
   - go get -t ./...
-
-script: make travis
-
+script:
+  - go test -v ./...
 notifications:
   email: false
