@@ -6,7 +6,6 @@ go:
   - tip
 
 install:
-  - make tools
   - go get -t ./...
 
 script: make travis
