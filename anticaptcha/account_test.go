@@ -17,9 +17,9 @@ func TestAccountService_GetBalance(t *testing.T) {
 	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=123123&action=getbalance",
 		httpmock.NewStringResponder(200, `1.0`))
 
-	account, err := client.Account.GetBalance()
+	balance, err := client.Account.GetBalance()
 	if err != nil {
 		t.Errorf("Account.GetBalance returned error: %v", err)
 	}
-	assert.Equal(t, account.Balance, 1.0)
+	assert.Equal(t, balance, 1.0)
 }
