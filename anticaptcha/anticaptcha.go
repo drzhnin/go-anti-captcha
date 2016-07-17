@@ -3,6 +3,7 @@ package anticaptcha
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -22,10 +23,14 @@ type Client struct {
 	BaseURL *url.URL
 
 	//Api key
-	ApiKey string
+	APIKey string
 
 	// Services used for talking to different parts of the API.
 	Account *AccountService
+}
+
+type service struct {
+	client *Client
 }
 
 // NewClient returns a new API client.
@@ -35,11 +40,7 @@ func NewClient(apiKey string) *Client {
 
 	baseURL, _ := url.Parse(defaultBaseURL)
 
-	if apiKey == "" {
-		panic("Set api key please")
-	}
-
-	c := &Client{client: httpClient, BaseURL: baseURL, ApiKey: apiKey}
+	c := &Client{client: httpClient, BaseURL: baseURL, APIKey: apiKey}
 	c.Account = &AccountService{client: c}
 
 	return c
@@ -84,6 +85,10 @@ func (c *Client) Do(req *http.Request) ([]byte, error) {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if string(data) == "ERROR_KEY_DOES_NOT_EXIST" {
+		return nil, errors.New("Api key does not exist, plaese set correct api key from http://anti-captcha.com")
 	}
 
 	return data, err

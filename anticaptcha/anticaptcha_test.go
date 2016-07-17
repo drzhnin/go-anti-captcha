@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,7 +41,7 @@ func TestNewClient(t *testing.T) {
 	apiKey := "123123"
 
 	assert.Equal(t, c.BaseURL.String(), defaultBaseURL)
-	assert.Equal(t, c.ApiKey, apiKey)
+	assert.Equal(t, c.APIKey, apiKey)
 }
 
 func TestNewRequest(t *testing.T) {
@@ -74,6 +75,15 @@ func TestDo(t *testing.T) {
 
 	want := 1.0
 	assert.Equal(t, body, want)
+
+	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=1&action=getbalance",
+		httpmock.NewStringResponder(200, `ERROR_KEY_DOES_NOT_EXIST`))
+
+	reqKeyTest, _ := client.NewRequest("GET", "http://anti-captcha.com/res.php?key=1&action=getbalance", nil)
+	_, err := client.Do(reqKeyTest)
+
+	assert.Equal(t, err.Error(), "Api key does not exist, plaese set correct api key from http://anti-captcha.com")
+
 }
 
 func testMethod(t *testing.T, r *http.Request, want string) {
