@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/jarcoal/httpmock"
@@ -48,13 +49,12 @@ func TestNewRequest(t *testing.T) {
 	c := NewClient("123123")
 
 	inURL, outURL := "/foo", defaultBaseURL+"/foo"
-	inBody, outBody := &Account{Balance: 1.0}, `{"Balance":1}`+"\n"
+	inBody, outBody := strings.NewReader(`{"Balance":1}`+"\n"), `{"Balance":1}`+"\n"
 	req, _ := c.NewRequest("GET", inURL, inBody)
 
 	// test that relative URL was expanded
 	assert.Equal(t, req.URL.String(), outURL)
 
-	// test that body was JSON encoded
 	body, _ := ioutil.ReadAll(req.Body)
 	assert.Equal(t, string(body), outBody)
 
@@ -76,12 +76,16 @@ func TestDo(t *testing.T) {
 	want := 1.0
 	assert.Equal(t, body, want)
 
-	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=1&action=getbalance",
+	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?&action=getbalance",
 		httpmock.NewStringResponder(200, `ERROR_KEY_DOES_NOT_EXIST`))
+	reqTestKeyNotExst, _ := client.NewRequest("GET", "http://anti-captcha.com/res.php?key=1&action=getbalance", nil)
+	_, err := client.Do(reqTestKeyNotExst)
+	assert.Equal(t, err.Error(), "Api key does not exist, plaese set correct api key from http://anti-captcha.com")
 
-	reqKeyTest, _ := client.NewRequest("GET", "http://anti-captcha.com/res.php?key=1&action=getbalance", nil)
-	_, err := client.Do(reqKeyTest)
-
+	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?&action=getbalance",
+		httpmock.NewStringResponder(200, `ERROR_WRONG_USER_KEY`))
+	reqTestWrongKey, _ := client.NewRequest("GET", "http://anti-captcha.com/res.php?key=1&action=getbalance", nil)
+	_, err = client.Do(reqTestWrongKey)
 	assert.Equal(t, err.Error(), "Api key does not exist, plaese set correct api key from http://anti-captcha.com")
 
 }

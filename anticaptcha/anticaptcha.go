@@ -1,8 +1,6 @@
 package anticaptcha
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -27,6 +25,7 @@ type Client struct {
 
 	// Services used for talking to different parts of the API.
 	Account *AccountService
+	Captcha *CaptchaService
 }
 
 type service struct {
@@ -42,13 +41,13 @@ func NewClient(apiKey string) *Client {
 
 	c := &Client{client: httpClient, BaseURL: baseURL, APIKey: apiKey}
 	c.Account = &AccountService{client: c}
-
+	c.Captcha = &CaptchaService{client: c}
 	return c
 }
 
 // NewRequest creates an API request. A relative URL can be provided in urlStr,
 // in which case it is resolved relative to the BaseURL of the Client.
-func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
+func (c *Client) NewRequest(method, urlStr string, body io.Reader) (*http.Request, error) {
 	rel, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
@@ -56,16 +55,7 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 
 	u := c.BaseURL.ResolveReference(rel)
 
-	var buf io.ReadWriter
-	if body != nil {
-		buf = new(bytes.Buffer)
-		err := json.NewEncoder(buf).Encode(body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	req, err := http.NewRequest(method, u.String(), buf)
+	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +77,7 @@ func (c *Client) Do(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	if string(data) == "ERROR_KEY_DOES_NOT_EXIST" {
+	if string(data) == "ERROR_KEY_DOES_NOT_EXIST" || string(data) == "ERROR_WRONG_USER_KEY" {
 		return nil, errors.New("Api key does not exist, plaese set correct api key from http://anti-captcha.com")
 	}
 
