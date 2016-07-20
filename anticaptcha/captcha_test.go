@@ -32,6 +32,26 @@ func TestCaptchaService_UploadCaptchaFromFile(t *testing.T) {
 	assert.Equal(t, err, errors.New("File does not exist"))
 }
 
+func TestCaptchaService_UploadCaptchaFromBase64(t *testing.T) {
+	httpmock.Activate()
+	setup()
+
+	defer httpmock.DeactivateAndReset()
+	defer teardown()
+
+	httpmock.RegisterResponder("POST", "http://anti-captcha.com/in.php",
+		httpmock.NewStringResponder(200, "OK|123"))
+	id, err := client.Captcha.UploadCaptchaFromBase64("x8akfmUYRVW9vZ/GCpG3Q/gaDUAAAAASUVORK5CYII=")
+	assert.Equal(t, id, 123)
+	assert.Equal(t, err, nil)
+
+	httpmock.RegisterResponder("POST", "http://anti-captcha.com/in.php",
+		httpmock.NewStringResponder(200, "ERROR_ZERO_CAPTCHA_FILESIZE"))
+	id, err = client.Captcha.UploadCaptchaFromBase64("")
+	assert.Equal(t, id, 0)
+	assert.Equal(t, err, errors.New("ERROR_ZERO_CAPTCHA_FILESIZE"))
+}
+
 func TestCaptchaService_GetText(t *testing.T) {
 	httpmock.Activate()
 	setup()
@@ -48,7 +68,7 @@ func TestCaptchaService_GetText(t *testing.T) {
 	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=123123&action=get&id=1213",
 		httpmock.NewStringResponder(200, "ERROR_NO_SUCH_CAPCHA_ID"))
 	text, err = client.Captcha.GetText(1213)
-	assert.Equal(t, text, "ERROR_NO_SUCH_CAPCHA_ID")
-	assert.Equal(t, err, errors.New("Captcha error"))
+	assert.Equal(t, text, "")
+	assert.Equal(t, err, errors.New("Error while receiving captcha"))
 
 }
