@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -60,6 +61,12 @@ func TestNewRequest(t *testing.T) {
 
 }
 
+func TestNewRequest_badURL(t *testing.T) {
+	c := NewClient("")
+	_, err := c.NewRequest("GET", ":", nil)
+	testURLParseError(t, err)
+}
+
 func TestDo(t *testing.T) {
 	setup()
 	defer teardown()
@@ -92,4 +99,13 @@ func TestDo(t *testing.T) {
 
 func testMethod(t *testing.T, r *http.Request, want string) {
 	assert.Equal(t, r.Method, want)
+}
+
+func testURLParseError(t *testing.T, err error) {
+	if err == nil {
+		t.Errorf("Expected error to be returned")
+	}
+	if err, ok := err.(*url.Error); !ok || err.Op != "parse" {
+		t.Errorf("Expected URL parse error, got %+v", err)
+	}
 }
