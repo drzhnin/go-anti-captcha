@@ -17,13 +17,14 @@ func main() {
 	str := base64.StdEncoding.EncodeToString(content)
 	ID, err := client.Captcha.UploadCaptchaFromBase64(str)
 	if err != nil {
-		fmt.Printf("error: %v\n\n", err)
+		fmt.Printf("error: %v\n", err)
 	} else {
 		fmt.Printf("Captcha ID: %d\n", ID)
+		res, err := client.Captcha.GetText(ID)
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+		}
+		fmt.Printf("Captcha Text: %s\n", res)
 	}
-	res, err := client.Captcha.GetText(ID)
-	if err != nil {
-		fmt.Printf("error: %v\n", err)
-	}
-	fmt.Printf("Captcha Text: %s\n", res)
+
 }

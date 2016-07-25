@@ -9,11 +9,6 @@ import (
 //anti-captcha API
 type AccountService service
 
-//Account represents account struct
-type Account struct {
-	Balance float64
-}
-
 //GetBalance represents balance from account
 func (s *AccountService) GetBalance() (float64, error) {
 	reqURL := fmt.Sprintf("res.php?key=%s&action=getbalance", s.client.APIKey)
@@ -28,12 +23,11 @@ func (s *AccountService) GetBalance() (float64, error) {
 		return 0.0, err
 	}
 
-	account := new(Account)
-	account.Balance, err = strconv.ParseFloat(string(data), 64)
+	accountBalance, err := strconv.ParseFloat(string(data), 64)
 	if err != nil {
 		return 0.0, err
 	}
-	return account.Balance, err
+	return accountBalance, err
 }
 
 // //GetStats represents statistics from account

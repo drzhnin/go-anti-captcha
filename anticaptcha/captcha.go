@@ -17,10 +17,20 @@ import (
 //anti-captcha API
 type CaptchaService service
 
-//Captcha response captcha struct
-type Captcha struct {
-	ID   int
-	Text string
+//checkResponse represents check response for have OK message
+func checkResponse(body []byte) (string, error) {
+	response := string(body)
+
+	if strings.Contains(response, "OK") {
+		list := strings.Split(response, "|")
+		for i := range list {
+			list[i] = strings.TrimSpace(list[i])
+		}
+
+		return list[1], nil
+	}
+
+	return "", errors.New(response)
 }
 
 //UploadCaptchaFromFile represents updaload image(jpg, gif, png) to http://anti-captcha.com API
@@ -56,19 +66,15 @@ func (s *CaptchaService) UploadCaptchaFromFile(path string) (int, error) {
 		return 0, err
 	}
 
-	captcha := new(Captcha)
-	splited := strings.Split(string(data), "|")
-
-	if splited[0] == "OK" {
-		captchaID := splited[1]
-		captcha.ID, err = strconv.Atoi(captchaID)
-		if err != nil {
-			return 0, err
-		}
-		return captcha.ID, nil
+	res, err := checkResponse(data)
+	if err != nil {
+		return 0, err
 	}
-
-	return 0, errors.New(splited[0])
+	captchaID, err := strconv.Atoi(res)
+	if err != nil {
+		return 0, err
+	}
+	return captchaID, nil
 }
 
 //UploadCaptchaFromBase64 represents updaload base64 string to http://anti-captcha.com API
@@ -94,19 +100,15 @@ func (s *CaptchaService) UploadCaptchaFromBase64(base64 string) (int, error) {
 		return 0, err
 	}
 
-	captcha := new(Captcha)
-	splited := strings.Split(string(data), "|")
-
-	if splited[0] == "OK" {
-		captchaID := splited[1]
-		captcha.ID, err = strconv.Atoi(captchaID)
-		if err != nil {
-			return 0, err
-		}
-		return captcha.ID, nil
+	res, err := checkResponse(data)
+	if err != nil {
+		return 0, err
 	}
-
-	return 0, errors.New(splited[0])
+	captchaID, err := strconv.Atoi(res)
+	if err != nil {
+		return 0, err
+	}
+	return captchaID, nil
 }
 
 //GetText represents return captcha text by ID
@@ -123,24 +125,14 @@ func (s *CaptchaService) GetText(id int) (string, error) {
 		return "", err
 	}
 
-	response := string(res)
-
-	captcha := new(Captcha)
-
-	if strings.Contains(response, "OK") {
-		list := strings.Split(response, "|")
-		for i := range list {
-			list[i] = strings.TrimSpace(list[i])
+	resOk, err := checkResponse(res)
+	if err != nil {
+		if fmt.Sprintf("%s", err) == "CAPCHA_NOT_READY" {
+			time.Sleep(5 * time.Second)
+			return s.GetText(id)
 		}
-		captcha.Text = list[1]
-		return captcha.Text, nil
+		return "", err
 	}
 
-	if response == "CAPCHA_NOT_READY" {
-		time.Sleep(5 * time.Second)
-		return s.GetText(id)
-	}
-
-	return "", errors.New("Error while receiving captcha")
-
+	return resOk, err
 }

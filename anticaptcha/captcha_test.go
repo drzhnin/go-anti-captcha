@@ -69,6 +69,6 @@ func TestCaptchaService_GetText(t *testing.T) {
 		httpmock.NewStringResponder(200, "ERROR_NO_SUCH_CAPCHA_ID"))
 	text, err = client.Captcha.GetText(1213)
 	assert.Equal(t, text, "")
-	assert.Equal(t, err, errors.New("Error while receiving captcha"))
+	assert.Equal(t, err, errors.New("ERROR_NO_SUCH_CAPCHA_ID"))
 
 }
