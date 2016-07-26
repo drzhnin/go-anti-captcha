@@ -14,7 +14,7 @@ func TestAccountService_GetBalance(t *testing.T) {
 	setup()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=123123&action=getbalance",
+	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=F629EBDA-D89A-4A0E-AAA5-069761578237&action=getbalance",
 		httpmock.NewStringResponder(200, `1.0`))
 
 	balance, err := client.Account.GetBalance()

@@ -30,7 +30,7 @@ func setup() {
 	server = httptest.NewServer(mux)
 
 	// github client configured to use test server
-	client = NewClient("123123")
+	client = NewClient("F629EBDA-D89A-4A0E-AAA5-069761578237")
 }
 
 // teardown closes the test HTTP server.
@@ -39,15 +39,15 @@ func teardown() {
 }
 
 func TestNewClient(t *testing.T) {
-	c := NewClient("123123")
-	apiKey := "123123"
+	c := NewClient("F629EBDA-D89A-4A0E-AAA5-069761578237")
+	apiKey := "F629EBDA-D89A-4A0E-AAA5-069761578237"
 
 	assert.Equal(t, c.BaseURL.String(), defaultBaseURL)
 	assert.Equal(t, c.APIKey, apiKey)
 }
 
 func TestNewRequest(t *testing.T) {
-	c := NewClient("123123")
+	c := NewClient("F629EBDA-D89A-4A0E-AAA5-069761578237")
 
 	inURL, outURL := "/foo", defaultBaseURL+"/foo"
 	inBody, outBody := strings.NewReader(`{"Balance":1}`+"\n"), `{"Balance":1}`+"\n"
