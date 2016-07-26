@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,28 @@ import (
 //CaptchaService handles communication with the captcha actions of the
 //anti-captcha API
 type CaptchaService service
+
+//UploadCaptchaFromURL represents upload captcha from url
+func (s *CaptchaService) UploadCaptchaFromURL(url string) (int, error) {
+	resp, err := http.Get(url)
+	if err != nil || resp.StatusCode != 200 {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	strBase64 := base64.StdEncoding.EncodeToString(body)
+
+	captchaID, err := s.uploadCaptcha(strBase64)
+	if err != nil {
+		return 0, err
+	}
+	return captchaID, err
+}
 
 //UploadCaptchaFromFile represents updaload image(jpg, gif, png) to http://anti-captcha.com API
 //and get capthca ID
