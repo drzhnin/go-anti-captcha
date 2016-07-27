@@ -17,7 +17,7 @@ var (
 	// mux is the HTTP request multiplexer used with the test server.
 	mux *http.ServeMux
 
-	// client is the GitHub client being tested.
+	//client being tested.
 	client *Client
 
 	// server is a test HTTP server used to provide mock API responses.
@@ -29,8 +29,9 @@ func setup() {
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
 
-	// github client configured to use test server
+	//client configured to use test server
 	client = NewClient("F629EBDA-D89A-4A0E-AAA5-069761578237")
+	client.CaptchaAdditionalParams.ResetToDefault()
 }
 
 // teardown closes the test HTTP server.

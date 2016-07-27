@@ -111,6 +111,10 @@ func checkResponse(body []byte) (string, error) {
 func (s CaptchaService) uploadCaptcha(base64 string) (int, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
+	params := s.client.CaptchaAdditionalParams.LoadParams()
+	for key, value := range params {
+		_ = writer.WriteField(key, value)
+	}
 	_ = writer.WriteField("body", base64)
 	_ = writer.WriteField("key", s.client.APIKey)
 	_ = writer.WriteField("method", "base64")
@@ -120,6 +124,7 @@ func (s CaptchaService) uploadCaptcha(base64 string) (int, error) {
 	}
 
 	req, err := s.client.NewRequest("POST", "in.php", body)
+
 	if err != nil {
 		return 0, err
 	}
