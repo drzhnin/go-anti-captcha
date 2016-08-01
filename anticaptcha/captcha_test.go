@@ -80,8 +80,7 @@ func TestCaptchaService_GetText(t *testing.T) {
 	defer httpmock.DeactivateAndReset()
 	defer teardown()
 
-	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=F629EBDA-D89A-4A0E-AAA5-069761578237&action=get&id=123",
-		httpmock.NewStringResponder(200, "OK|text"))
+	httpmock.RegisterResponder("GET", "http://anti-captcha.com/res.php?key=F629EBDA-D89A-4A0E-AAA5-069761578237&action=get&id=123", httpmock.NewStringResponder(200, "OK|text"))
 	text, err := client.Captcha.GetText(123)
 	assert.Equal(t, text, "text")
 	assert.Equal(t, err, nil)

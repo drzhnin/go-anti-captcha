@@ -24,8 +24,9 @@ type Client struct {
 	APIKey string
 
 	// Services used for talking to different parts of the API.
-	Account *AccountService
-	Captcha *CaptchaService
+	Account                 *AccountService
+	Captcha                 *CaptchaService
+	CaptchaAdditionalParams *AdditionalParams
 }
 
 type service struct {
@@ -42,6 +43,7 @@ func NewClient(apiKey string) *Client {
 	c := &Client{client: httpClient, BaseURL: baseURL, APIKey: apiKey}
 	c.Account = &AccountService{client: c}
 	c.Captcha = &CaptchaService{client: c}
+	c.CaptchaAdditionalParams = &AdditionalParams{client: c}
 	return c
 }
 

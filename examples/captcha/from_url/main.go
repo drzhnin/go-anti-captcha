@@ -8,6 +8,7 @@ import (
 
 func main() {
 	client := anticaptcha.NewClient("apiKey") //Set your apiKey
+	client.CaptchaAdditionalParams.EnableRegsense()
 	ID, err := client.Captcha.UploadCaptchaFromURL("https://s3-us-west-2.amazonaws.com/captcha-test/1045.png")
 	if err != nil {
 		fmt.Printf("error: %v\n", err)
