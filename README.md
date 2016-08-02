@@ -26,9 +26,64 @@ func main() {
 }
 
 ```
+
+Upload captcha from url and get text:
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/andrewdruzhinin/go-anti-captcha/anticaptcha"
+)
+
+func main() {
+	client := anticaptcha.NewClient("apiKey") //Set your apiKey
+	ID, err := client.Captcha.UploadCaptchaFromURL("https://s3-us-west-2.amazonaws.com/captcha-test/1045.png")
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+	} else {
+		fmt.Printf("Captcha ID: %d\n", ID)
+		res, err := client.Captcha.GetText(ID)
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+		}
+		fmt.Printf("Captcha Text: %s\n", res)
+	}
+
+}
+```
 Take a look at ./examples/ to know more how to use anti-captcha api.
 
 ## Additional captcha parameters ##
+You can use optional captcha parameters:
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/andrewdruzhinin/go-anti-captcha/anticaptcha"
+)
+
+func main() {
+	client := anticaptcha.NewClient("APIKey")
+	client.CaptchaAdditionalParams.EnablePhrate()
+	client.CaptchaAdditionalParams.EnableAllowEmpty()
+	client.CaptchaAdditionalParams.AddComment("What color is the sky?")
+	fmt.Println(client.CaptchaAdditionalParams.LoadParams())
+	ID, err := client.Captcha.UploadCaptchaFromURL("https://s3-us-west-2.amazonaws.com/captcha-test/1045.png")
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+	} else {
+		fmt.Printf("Captcha ID: %d\n", ID)
+		res, err := client.Captcha.GetText(ID)
+		if err != nil {
+			fmt.Printf("error: %v\n", err)
+		}
+		fmt.Printf("Captcha Text: %s\n", res)
+}
+```
 Parameter |	Type |	Possible values |	Description
 ------------ | ------------- | -------------|  -------------
 phrase |	integer | 0, 1 | 0 = default value, 1 = captcha has 2-3 words
