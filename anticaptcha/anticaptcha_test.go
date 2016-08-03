@@ -98,6 +98,35 @@ func TestDo(t *testing.T) {
 
 }
 
+func TestAccountService_GetSystemStat(t *testing.T) {
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
+
+	setup()
+	defer teardown()
+
+	httpmock.RegisterResponder("GET", "http://anti-captcha.com/load.php", httpmock.NewStringResponder(200, `<RESPONSE>
+	<waiting>50</waiting>
+	<waitingRU>0</waitingRU>
+	<load>75.4</load>
+	<minbid>0.0009072645</minbid>
+	<minbidRU>0.0010887339</minbidRU>
+	<averageRecognitionTime>14.853999734384</averageRecognitionTime>
+	<averageRecognitionTimeRU>13.725848563969</averageRecognitionTimeRU>
+	</RESPONSE>`))
+	sysStat, err := client.GetSystemStat()
+	if err != nil {
+		t.Errorf("Account.GetSystemStat returned error: %v", err)
+	}
+	assert.Equal(t, sysStat.Waiting, 50)
+	assert.Equal(t, sysStat.WaitingRU, 0)
+	assert.Equal(t, sysStat.Load, 75.4)
+	assert.Equal(t, sysStat.Minbid, 0.0009072645)
+	assert.Equal(t, sysStat.MinbidRU, 0.0010887339)
+	assert.Equal(t, sysStat.AverageRecognitionTime, 14.853999734384)
+	assert.Equal(t, sysStat.AverageRecognitionTimeRU, 13.725848563969)
+}
+
 func testMethod(t *testing.T, r *http.Request, want string) {
 	assert.Equal(t, r.Method, want)
 }

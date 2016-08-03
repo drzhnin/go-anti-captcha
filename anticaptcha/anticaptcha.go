@@ -1,6 +1,7 @@
 package anticaptcha
 
 import (
+	"encoding/xml"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -11,6 +12,17 @@ import (
 const (
 	defaultBaseURL = "http://anti-captcha.com"
 )
+
+//SystemStat contains statistics from anti-captcha system
+type SystemStat struct {
+	Waiting                  int     `xml:"waiting"`
+	WaitingRU                int     `xml:"waitingRU"`
+	Load                     float64 `xml:"load"`
+	Minbid                   float64 `xml:"minbid"`
+	MinbidRU                 float64 `xml:"minbidRU"`
+	AverageRecognitionTime   float64 `xml:"averageRecognitionTime"`
+	AverageRecognitionTimeRU float64 `xml:"averageRecognitionTimeRU"`
+}
 
 // A Client manages communication with the API.
 type Client struct {
@@ -84,4 +96,22 @@ func (c *Client) Do(req *http.Request) ([]byte, error) {
 	}
 
 	return data, err
+}
+
+//GetSystemStat represents load real time load statistics
+func (c *Client) GetSystemStat() (*SystemStat, error) {
+	var stats *SystemStat
+	req, err := c.NewRequest("GET", "load.php", nil)
+	if err != nil {
+		return stats, err
+	}
+	data, err := c.Do(req)
+	if err != nil {
+		return stats, err
+	}
+	err = xml.Unmarshal(data, &stats)
+	if err != nil {
+		return stats, err
+	}
+	return stats, err
 }

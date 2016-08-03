@@ -29,8 +29,3 @@ func (s *AccountService) GetBalance() (float64, error) {
 	}
 	return accountBalance, err
 }
-
-// //GetStats represents statistics from account
-// func (s *AccountService) GetStats() {
-//
-// }
